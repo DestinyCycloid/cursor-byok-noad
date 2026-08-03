@@ -56,12 +56,16 @@ jobs:
           archive="bin/windows-64-noads.zip"
           test -s "$archive"
           unzip -l "$archive"
+          rm -rf artifact
+          mkdir -p artifact
+          unzip -q "$archive" -d artifact
+          test -s artifact/windows-64-noads.exe
 
-      - name: Upload no-ads artifact
+      - name: Upload no-ads executable
         uses: actions/upload-artifact@v4
         with:
           name: noads-windows-amd64
-          path: bin/windows-64-noads.zip
+          path: artifact/windows-64-noads.exe
           if-no-files-found: error
 
   release:
@@ -73,12 +77,15 @@ jobs:
       contents: write
 
     steps:
-      - name: Download no-ads artifacts
+      - name: Download no-ads executable
         uses: actions/download-artifact@v4
         with:
-          pattern: noads-windows-*
+          name: noads-windows-amd64
           path: release-assets
-          merge-multiple: true
+
+      - name: Create release archive
+        shell: bash
+        run: zip -j release-assets/windows-64-noads.zip release-assets/windows-64-noads.exe
 
       - name: Create GitHub release
         env:
