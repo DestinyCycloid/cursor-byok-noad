@@ -11,14 +11,8 @@ permissions:
 
 jobs:
   build:
-    name: Build Windows ${{ matrix.arch }} no-ads package
+    name: Build Windows amd64 no-ads package
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        arch:
-          - 386
-          - amd64
 
     steps:
       - name: Check out source
@@ -54,20 +48,20 @@ jobs:
           version: 3.x
 
       - name: Build no-ads package
-        run: task build:windows:${{ matrix.arch }}:noads
+        run: task build:windows:amd64:noads
 
       - name: Verify package
         shell: bash
         run: |
-          archive="bin/windows-${{ matrix.arch }}-noads.zip"
+          archive="bin/windows-64-noads.zip"
           test -s "$archive"
           unzip -l "$archive"
 
       - name: Upload no-ads artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noads-windows-${{ matrix.arch }}
-          path: bin/windows-${{ matrix.arch }}-noads.zip
+          name: noads-windows-amd64
+          path: bin/windows-64-noads.zip
           if-no-files-found: error
 
   release:
