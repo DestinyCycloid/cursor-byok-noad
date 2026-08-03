@@ -1,9 +1,8 @@
 <script setup>
 import Button from "@/components/ui/Button.vue";
 import Card from "@/components/ui/Card.vue";
-import Switch from "@/components/ui/Switch.vue";
 import HomeMetricsCard from "@/components/HomeMetricsCard.vue";
-import { useMessage } from "@/composables/useMessage";
+import CursorAccountCard from "@/components/CursorAccountCard.vue";
 import { showModal } from "@/composables/useModal";
 import { getAdRuntime } from "@/services/adApi";
 import { adsEnabled } from "@/features/adsEnabled";
@@ -12,7 +11,6 @@ import {
   appViewState,
   openConfigWindow,
   openModelConfigWindow,
-  saveRoutingMode,
   syncHomeMetrics,
   syncServiceState,
   toUserError,
@@ -21,8 +19,6 @@ import {
 import { Events } from "@wailsio/runtime";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-const directModeEnabled = computed(() => appState.routingMode === "upstream");
-const message = useMessage();
 const AD_UPDATED_EVENT = __NO_ADS__ ? "" : "ad:updated";
 const OPEN_AD_EVENT = __NO_ADS__ ? "" : "cursor:open-ad";
 
@@ -128,15 +124,6 @@ async function handleOpenModelConfig() {
   }
 }
 
-async function handleDirectModeChange(enabled) {
-  const result = await saveRoutingMode(enabled ? "upstream" : "local");
-  if (!result.ok) {
-    await showActionError("切换失败", result.error);
-    return;
-  }
-  message.success(enabled ? "已切换到直连 Cursor 模式" : "已切换到本地服务模式");
-}
-
 onMounted(() => {
   if (!adsEnabled) {
     return;
@@ -153,7 +140,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-4 pt-0 text-[#e5e5e5]">
+  <div class="flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-4 pt-0 text-[#e5e5e5]">
     <HomeMetricsCard
       :metrics="appState.homeMetrics"
       :loading="appState.homeMetricsLoading"
@@ -184,19 +171,10 @@ onBeforeUnmount(() => {
           class="rounded-[8px] border border-[#4b1d1d] bg-[#2a1313] px-3 py-2 text-sm text-[#fca5a5]">
           {{ appState.serviceLastError }}
         </div>
-
-        <Switch
-          label="直连模式"
-          description="开启后，Cursor将直接接通官方，请勿开启"
-          enabled-text="当前为直连模式"
-          disabled-text="当前为本地服务模式"
-          :enabled="directModeEnabled"
-          :busy="appState.configSaving"
-          :disabled="appState.configSaving"
-          @change="handleDirectModeChange"
-        />
       </div>
     </Card>
+
+    <CursorAccountCard />
 
     <Card>
       <div class="flex items-center justify-between gap-4">
