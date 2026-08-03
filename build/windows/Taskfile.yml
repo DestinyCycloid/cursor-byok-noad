@@ -22,6 +22,8 @@ tasks:
             ref: .DEV
           SCAN:
             ref: .SCAN
+          NO_ADS:
+            ref: .NO_ADS
 
   build:native:
     summary: 使用 Go 原生交叉编译构建 Windows 程序
@@ -36,6 +38,8 @@ tasks:
             ref: .DEV
           SCAN:
             ref: .SCAN
+          NO_ADS:
+            ref: .NO_ADS
       - task: common:generate:icons
     cmds:
       - task: generate:syso
@@ -81,6 +85,8 @@ tasks:
         vars:
           SCAN:
             ref: .SCAN
+          NO_ADS:
+            ref: .NO_ADS
     cmds:
       - wails3 generate webview2bootstrapper -dir "{{.ROOT_DIR}}/build/windows/nsis"
       - |
@@ -101,6 +107,8 @@ tasks:
         vars:
           SCAN:
             ref: .SCAN
+          NO_ADS:
+            ref: .NO_ADS
     cmds:
       - |-
         wails3 tool msix \
@@ -141,6 +149,8 @@ tasks:
             ref: .DEV
           SCAN:
             ref: .SCAN
+          NO_ADS:
+            ref: .NO_ADS
       - rm -rf "{{.STAGING_DIR}}"
       - mkdir -p "{{.STAGING_DIR}}"
       - cp "{{.OUTPUT}}" "{{.STAGING_DIR}}/"

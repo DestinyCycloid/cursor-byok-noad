@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { getAdRuntime, openAdExternalURL } from "@/services/clientApi";
+import { getAdRuntime, openAdExternalURL } from "@/services/adApi";
 
 const OPEN_AD_EVENT = "cursor:open-ad";
 const BRIDGE_SOURCE = "cursor-ad";

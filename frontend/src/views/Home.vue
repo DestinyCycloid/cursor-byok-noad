@@ -5,7 +5,8 @@ import Switch from "@/components/ui/Switch.vue";
 import HomeMetricsCard from "@/components/HomeMetricsCard.vue";
 import { useMessage } from "@/composables/useMessage";
 import { showModal } from "@/composables/useModal";
-import { getAdRuntime } from "@/services/clientApi";
+import { getAdRuntime } from "@/services/adApi";
+import { adsEnabled } from "@/features/adsEnabled";
 import {
   appState,
   appViewState,
@@ -22,8 +23,8 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 const directModeEnabled = computed(() => appState.routingMode === "upstream");
 const message = useMessage();
-const AD_UPDATED_EVENT = "ad:updated";
-const OPEN_AD_EVENT = "cursor:open-ad";
+const AD_UPDATED_EVENT = __NO_ADS__ ? "" : "ad:updated";
+const OPEN_AD_EVENT = __NO_ADS__ ? "" : "cursor:open-ad";
 
 const adRuntime = ref(null);
 let unsubscribeAdUpdated = null;
@@ -137,6 +138,9 @@ async function handleDirectModeChange(enabled) {
 }
 
 onMounted(() => {
+  if (!adsEnabled) {
+    return;
+  }
   unsubscribeAdUpdated = Events.On(AD_UPDATED_EVENT, handleAdUpdated);
   void syncAdRuntimeQuietly();
 });
@@ -154,9 +158,9 @@ onBeforeUnmount(() => {
       :metrics="appState.homeMetrics"
       :loading="appState.homeMetricsLoading"
       :error="appState.homeMetricsError"
-      :home-ads="homeAds"
+      :home-ads="adsEnabled ? homeAds : []"
       @refresh="handleRefreshMetrics"
-      @open-ad="handleOpenHomeAd"
+      @open-ad="adsEnabled ? handleOpenHomeAd : undefined"
     />
 
     <Card>

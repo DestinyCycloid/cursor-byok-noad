@@ -94,7 +94,7 @@ tasks:
       - wails3 generate bindings -f '{{.BUILD_FLAGS}}' -clean=true
 
   build:frontend:
-    label: build:frontend (DEV={{.DEV}} SCAN={{.SCAN}})
+    label: build:frontend (DEV={{.DEV}} SCAN={{.SCAN}} NO_ADS={{.NO_ADS}})
     summary: 构建前端资源
     dir: '{{.ROOT_DIR}}/frontend'
     sources:
@@ -111,6 +111,7 @@ tasks:
       - yarn run {{.BUILD_COMMAND}}{{if eq .SCAN "true"}} --scan{{end}}
     env:
       PRODUCTION: '{{if eq .DEV "true"}}false{{else}}true{{end}}'
+      NO_ADS: '{{.NO_ADS | default "false"}}'
     vars:
       BUILD_COMMAND: '{{if eq .DEV "true"}}build:dev{{else}}build{{end}}'
       SCAN: '{{.SCAN | default "false"}}'

@@ -92,6 +92,18 @@ tasks:
           DMG_NAME: macos-intel.dmg
           SCAN: '{{.SCAN}}'
 
+  build:windows:current:noads:
+    summary: 构建当前 Windows 架构的无广告 ZIP 包
+    cmds:
+      - task: windows:create:zip
+        vars:
+          ARCH: '{{.CURRENT_WINDOWS_ARCH}}'
+          OUTPUT: '{{.BIN_DIR}}/{{.CURRENT_WINDOWS_NAME}}-noads.exe'
+          ZIP_NAME: '{{.CURRENT_WINDOWS_NAME}}-noads.zip'
+          EXTRA_TAGS: noads
+          NO_ADS: "true"
+          SCAN: '{{.SCAN}}'
+
   build:windows:current:
     internal: true
     cmds:
@@ -100,6 +112,18 @@ tasks:
           ARCH: '{{.CURRENT_WINDOWS_ARCH}}'
           OUTPUT: '{{.BIN_DIR}}/{{.CURRENT_WINDOWS_NAME}}.exe'
           ZIP_NAME: '{{.CURRENT_WINDOWS_NAME}}.zip'
+          SCAN: '{{.SCAN}}'
+
+  build:windows:386:noads:
+    summary: 构建不包含广告功能的 Windows 32 位 ZIP 包
+    cmds:
+      - task: windows:create:zip
+        vars:
+          ARCH: 386
+          OUTPUT: '{{.BIN_DIR}}/windows-32-noads.exe'
+          ZIP_NAME: windows-32-noads.zip
+          EXTRA_TAGS: noads
+          NO_ADS: "true"
           SCAN: '{{.SCAN}}'
 
   build:windows:386:
@@ -119,6 +143,18 @@ tasks:
           ARCH: amd64
           OUTPUT: '{{.BIN_DIR}}/windows-64.exe'
           ZIP_NAME: windows-64.zip
+          SCAN: '{{.SCAN}}'
+
+  build:windows:amd64:noads:
+    summary: 构建不包含广告功能的 Windows 64 位 ZIP 包
+    cmds:
+      - task: windows:create:zip
+        vars:
+          ARCH: amd64
+          OUTPUT: '{{.BIN_DIR}}/windows-64-noads.exe'
+          ZIP_NAME: windows-64-noads.zip
+          EXTRA_TAGS: noads
+          NO_ADS: "true"
           SCAN: '{{.SCAN}}'
 
   build:linux:current:

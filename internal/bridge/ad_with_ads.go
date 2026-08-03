@@ -1,3 +1,5 @@
+//go:build !noads
+
 package bridge
 
 import (
