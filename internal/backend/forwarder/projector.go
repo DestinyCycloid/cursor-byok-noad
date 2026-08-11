@@ -249,10 +249,10 @@ func (projector *HistoryProjector) ProjectPromptReplay(conversation *Conversatio
 					replayMessages[index].OpenAIResponsesReasoningSummary = append(json.RawMessage(nil), payload.ReasoningSummary...)
 					applyPromptProviderMetadataToFirstToolCall(&replayMessages[index], payload.ProviderItemID, payload.ProviderCallID, payload.ProviderStatus)
 				}
-				for _, replay := range replayMessages {
-					if strings.TrimSpace(replay.Role) == "tool" {
-						toolName := firstNonEmpty(strings.TrimSpace(replay.Name), strings.TrimSpace(payload.ToolName))
-						replay.Content = limitProjectedToolResultReplay(toolName, replay.Content, payload.ResultText, true, historicalToolResult)
+				for index := range replayMessages {
+					if strings.TrimSpace(replayMessages[index].Role) == "tool" {
+						toolName := firstNonEmpty(strings.TrimSpace(replayMessages[index].Name), strings.TrimSpace(payload.ToolName))
+						replayMessages[index].Content = limitProjectedToolResultReplay(toolName, replayMessages[index].Content, payload.ResultText, true, historicalToolResult)
 					}
 					messages = append(messages, toModelMessage(replay))
 				}
