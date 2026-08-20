@@ -33,14 +33,6 @@ var cursorStateDisabledStatsigGates = []string{
 	"disable_terminal_output_ui_streaming",
 }
 
-// cursorStateEnabledStatsigGates forces gates to true. Disabling the network
-// change monitor stops the always-local extension from probing
-// NetworkService/IsConnected and aborting slow in-flight requests (such as
-// commit message generation) with "Network disconnected".
-var cursorStateEnabledStatsigGates = []string{
-	"disable_network_change_monitor_local",
-}
-
 // InjectCursorUserInfo synchronizes the Cursor user-level auth cache used by the
 // Settings page. It does not modify the installed Cursor app bundle.
 func InjectCursorUserInfo(email, token string) error {
@@ -58,13 +50,12 @@ func InjectCursorUserInfo(email, token string) error {
 	}
 
 	logger.Infof(
-		"injectCursorUserInfo synced path=%s email=%s membership=%s subscription=%s disabled_statsig_gates=%s enabled_statsig_gates=%s",
+		"injectCursorUserInfo synced path=%s email=%s membership=%s subscription=%s disabled_statsig_gates=%s",
 		stateDBPath,
 		values["cursorAuth/cachedEmail"],
 		values["cursorAuth/stripeMembershipType"],
 		values["cursorAuth/stripeSubscriptionStatus"],
 		strings.Join(cursorStateDisabledStatsigGates, ","),
-		strings.Join(cursorStateEnabledStatsigGates, ","),
 	)
 	return nil
 }
@@ -129,7 +120,7 @@ func syncCursorAuthStateDB(path string, values map[string]string) error {
 		}
 	}
 
-	if err := syncCursorStatsigGateOverrides(ctx, tx); err != nil {
+	if err := disableCursorStatsigGates(ctx, tx); err != nil {
 		return err
 	}
 
@@ -140,7 +131,7 @@ func syncCursorAuthStateDB(path string, values map[string]string) error {
 	return nil
 }
 
-func syncCursorStatsigGateOverrides(ctx context.Context, tx *sql.Tx) error {
+func disableCursorStatsigGates(ctx context.Context, tx *sql.Tx) error {
 	var raw []byte
 	err := tx.QueryRowContext(ctx, "SELECT value FROM ItemTable WHERE key = ?", cursorStateStatsigBootstrapKey).Scan(&raw)
 	if err != nil {
@@ -163,15 +154,9 @@ func syncCursorStatsigGateOverrides(ctx context.Context, tx *sql.Tx) error {
 
 	hashUsed, _ := payload["hash_used"].(string)
 	for _, gate := range cursorStateDisabledStatsigGates {
-		setCursorStatsigGate(featureGates, gate, false, "local_disabled")
+		disableCursorStatsigGate(featureGates, gate)
 		if strings.EqualFold(hashUsed, "djb2") {
-			setCursorStatsigGate(featureGates, cursorStateDJB2Hash(gate), false, "local_disabled")
-		}
-	}
-	for _, gate := range cursorStateEnabledStatsigGates {
-		setCursorStatsigGate(featureGates, gate, true, "local_enabled")
-		if strings.EqualFold(hashUsed, "djb2") {
-			setCursorStatsigGate(featureGates, cursorStateDJB2Hash(gate), true, "local_enabled")
+			disableCursorStatsigGate(featureGates, cursorStateDJB2Hash(gate))
 		}
 	}
 
@@ -185,21 +170,21 @@ func syncCursorStatsigGateOverrides(ctx context.Context, tx *sql.Tx) error {
 	return nil
 }
 
-func setCursorStatsigGate(featureGates map[string]any, key string, value bool, rule string) {
+func disableCursorStatsigGate(featureGates map[string]any, key string) {
 	gate, _ := featureGates[key].(map[string]any)
 	if gate == nil {
 		gate = map[string]any{
 			"name":       key,
-			"rule_id":    rule,
-			"ruleID":     rule,
-			"group_name": rule,
-			"groupName":  rule,
+			"rule_id":    "local_disabled",
+			"ruleID":     "local_disabled",
+			"group_name": "local_disabled",
+			"groupName":  "local_disabled",
 			"id_type":    "userID",
 			"idType":     "userID",
 		}
 		featureGates[key] = gate
 	}
-	gate["value"] = value
+	gate["value"] = false
 }
 
 func cursorStateDJB2Hash(value string) string {

@@ -28,7 +28,6 @@ type exchangeContext struct {
 type Server struct {
 	config      Config
 	certManager *certs.Manager
-	caCertPEM   []byte
 	store       *exchangeStore
 	counter     atomic.Uint64
 	proxyServer *http.Server
@@ -44,14 +43,13 @@ func New(config Config) (*Server, error) {
 	if err := validateLoopbackAddress(config.UIAddr); err != nil {
 		return nil, err
 	}
-	manager, caCertPEM, err := certs.NewGeneratedManager()
+	manager, err := certs.NewEmbeddedManager()
 	if err != nil {
 		return nil, fmt.Errorf("加载 MITM CA 失败：%w", err)
 	}
 	server := &Server{
 		config:      config,
 		certManager: manager,
-		caCertPEM:   caCertPEM,
 		store:       newExchangeStore(config.MaxExchanges),
 	}
 	proxyHandler, err := server.newProxyHandler()

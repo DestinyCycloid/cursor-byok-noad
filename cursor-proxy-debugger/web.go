@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"cursor/internal/certs"
 )
 
 //go:embed web/*
@@ -91,7 +93,7 @@ func (server *Server) handleEvents(writer http.ResponseWriter, request *http.Req
 func (server *Server) handleCACertificate(writer http.ResponseWriter, _ *http.Request) {
 	writer.Header().Set("Content-Type", "application/x-x509-ca-cert")
 	writer.Header().Set("Content-Disposition", `attachment; filename="cursor-local-proxy-ca.crt"`)
-	_, _ = writer.Write(server.caCertPEM)
+	_, _ = writer.Write(certs.EmbeddedCACertPEM())
 }
 
 func writeJSON(writer http.ResponseWriter, status int, payload any) {

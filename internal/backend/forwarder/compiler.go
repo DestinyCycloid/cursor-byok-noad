@@ -20,21 +20,16 @@ type DefaultPromptCompiler struct {
 	catalog   ToolCatalog
 	reminders ReminderInjector
 	rules     *UserRuleStore
-	blobs     contentBlobReader
 }
 
 // NewPromptCompiler 创建默认 prompt 编译器。
-func NewPromptCompiler(projector *HistoryProjector, catalog ToolCatalog, reminders ReminderInjector, rules *UserRuleStore, blobReaders ...contentBlobReader) *DefaultPromptCompiler {
-	compiler := &DefaultPromptCompiler{
+func NewPromptCompiler(projector *HistoryProjector, catalog ToolCatalog, reminders ReminderInjector, rules *UserRuleStore) *DefaultPromptCompiler {
+	return &DefaultPromptCompiler{
 		projector: projector,
 		catalog:   catalog,
 		reminders: reminders,
 		rules:     rules,
 	}
-	if len(blobReaders) > 0 {
-		compiler.blobs = blobReaders[0]
-	}
-	return compiler
 }
 
 // Compile 生成当前 turn 应发送给 provider 的消息和工具集合。
@@ -88,10 +83,6 @@ func (compiler *DefaultPromptCompiler) Compile(conversation *ConversationFile, m
 		})
 	}
 	stableReplayCount, err := compiler.stableReplayMessageCount(conversation, replayMessages)
-	if err != nil {
-		return CompiledConversation{}, err
-	}
-	replayMessages, err = enrichProviderReadImages(replayMessages, conversation, compiler.blobs)
 	if err != nil {
 		return CompiledConversation{}, err
 	}
