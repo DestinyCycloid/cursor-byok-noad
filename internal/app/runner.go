@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"cursor/internal/appdata"
 	serverconfig "cursor/internal/backend/server/config"
 	"cursor/internal/buildinfo"
 
@@ -33,8 +34,6 @@ import (
 const (
 	// appName 表示当前模块中的 appName 状态值。
 	appName = "Cursor助手"
-	// adRefreshInterval 表示后台广告拉取间隔。
-	adRefreshInterval = 3 * time.Minute
 	// disableWebViewSandboxEnv allows affected VDI users to opt out of the WebView2 sandbox.
 	disableWebViewSandboxEnv = "CURSOR_BYOK_DISABLE_WEBVIEW_SANDBOX"
 )
@@ -66,20 +65,21 @@ func Run(resources EmbeddedResources) error {
 	logger.Init()
 	netproxy.InstallDefaultTransport()
 
-	embeddedCACertPEM := certs.EmbeddedCACertPEM()
-	logEmbeddedCAInfo(embeddedCACertPEM)
-
-	certManager, err := certs.NewEmbeddedManager()
+	if err := appdata.EnsureAssistantHome(); err != nil {
+		return err
+	}
+	certManager, caCertPEM, err := certs.LoadOrCreateManager(appdata.CACertFilePath(), appdata.CAKeyFilePath())
 	if err != nil {
 		return err
 	}
+	logEmbeddedCAInfo(caCertPEM)
 
 	defaultBackendBaseURL := "http://" + serverconfig.DefaultBackendListenAddr
 	proxyServer, err := mitm.NewProxyServer(serverconfig.DefaultProxyListenAddr, defaultBackendBaseURL, "", "", certManager)
 	if err != nil {
 		return err
 	}
-	proxyService := bridge.NewProxyService(proxyServer, certManager, embeddedCACertPEM)
+	proxyService := bridge.NewProxyService(proxyServer, certManager, caCertPEM)
 	metricsService := bridge.NewMetricsService()
 	windowService := bridge.NewWindowService()
 	adController := newAdController(proxyService, defaultBackendBaseURL)
