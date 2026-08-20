@@ -2357,6 +2357,7 @@ func readImageDataBlobOutput(data []byte) *agentv1.ReadToolSuccess_DataBlobId {
 	}
 	return &agentv1.ReadToolSuccess_DataBlobId{DataBlobId: blobID}
 }
+
 // convertReadResultToReadToolResult 把 `ReadResult` 映射为 `ReadToolResult`。
 func convertReadResultToReadToolResult(result *agentv1.ReadResult) *agentv1.ReadToolResult {
 	if result == nil {

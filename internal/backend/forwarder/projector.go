@@ -254,7 +254,7 @@ func (projector *HistoryProjector) ProjectPromptReplay(conversation *Conversatio
 						toolName := firstNonEmpty(strings.TrimSpace(replayMessages[index].Name), strings.TrimSpace(payload.ToolName))
 						replayMessages[index].Content = limitProjectedToolResultReplay(toolName, replayMessages[index].Content, payload.ResultText, true, historicalToolResult)
 					}
-					messages = append(messages, toModelMessage(replay))
+					messages = append(messages, toModelMessage(replayMessages[index]))
 				}
 				continue
 			}
