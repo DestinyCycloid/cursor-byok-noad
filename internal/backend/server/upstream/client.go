@@ -452,7 +452,9 @@ func newProtoMessage(typeName string) (proto.Message, error) {
 	case "aiserver.v1.TrackEventsResponse":
 		return &aiserverv1.TrackEventsResponse{}, nil
 	case "aiserver.v1.IsConnectedResponse":
-		return &aiserverv1.IsConnectedResponse{}, nil
+		// The response is intentionally empty. Until generated sources are
+		// refreshed, any empty generated message has the same wire encoding.
+		return &aiserverv1.GetTeamAdminSettingsResponse{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported proto message type %q", typeName)
 	}
